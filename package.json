@@ -1,0 +1,30 @@
+{
+  "name": "tareas",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt",
+    "build": "nuxt build",
+    "start": "nuxt start",
+    "generate": "nuxt generate"
+  },
+  "dependencies": {
+    "@nuxtjs/composition-api": "^0.33.1",
+    "ant-design-vue": "^1.7.8",
+    "core-js": "^3.25.3",
+    "howler": "^2.2.3",
+    "jsmaps": "0.0.15",
+    "leaflet": "^1.9.3",
+    "moment": "^2.29.4",
+    "nuxt": "^2.15.8",
+    "vue": "^2.7.10",
+    "vue-moment": "^4.1.0",
+    "vue-server-renderer": "^2.7.10",
+    "vue-template-compiler": "^2.7.10",
+    "vue-web-cam": "^1.9.0",
+    "vue2-leaflet": "^2.7.1"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.3"
+  }
+}
