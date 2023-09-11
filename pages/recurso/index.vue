@@ -1,49 +1,74 @@
 <template>
-  <div>
-    <web-cam ref="webcam" :width="videoWidth" :height="videoHeight" :autoplay="true" @started="onWebcamStarted" />
+  <div id="app">
+    <vue-webcam id="webcam" />
     <p v-if="isMoving">Se detectó movimiento</p>
   </div>
 </template>
 
 <script>
-import { WebCam } from 'vue-web-cam';
+import VueWebcam from 'vue-webcam';
+import { message } from 'ant-design-vue'
 
 export default {
   components: {
-    WebCam,
+    VueWebcam,
   },
   data() {
     return {
       isMoving: false,
-      videoWidth: 640, // Ancho del video de la cámara
-      videoHeight: 480, // Alto del video de la cámara
+      orden: '',
+      listaAudios: ['acostado', 'quieto', 'sentado'],
+      audioFile: '',
     };
   },
-  methods: {
-    onWebcamStarted() {
-      // Una vez que la cámara se haya iniciado, comenzamos a detectar movimiento
-      this.startMotionDetection();
-    },
-    startMotionDetection() {
-      const videoElement = this.$refs.webcam.video;
+  mounted() {
+    this.webcam = new VueWebcam('#webcam');
+    this.webcam.start();
 
-      // Configura un intervalo para verificar el movimiento cada ciertos milisegundos
-      const motionDetectionInterval = setInterval(() => {
-        if (this.detectMotion(videoElement)) {
-          // Se detectó movimiento
-          this.isMoving = true;
-        } else {
-          // No se detectó movimiento
-          this.isMoving = false;
-        }
-      }, 1000); // Verificar cada segundo (ajusta el valor según tus necesidades)
-    },
-    detectMotion(videoElement) {
-      // Aquí puedes implementar tu lógica de detección de movimiento
-      // Puedes utilizar bibliotecas como tracking.js o cualquier otro método de tu elección
-      // Para este ejemplo, simplemente devolvemos true para simular la detección de movimiento
-      return true; // Simulación de detección de movimiento
-    },
+    this.webcam.on('motion', () => {
+      this.isMoving = true;
+      this.audios()
+    });
+    const frames = [];
+    const v = this
+setInterval(async (v) => {
+  const frame = v.webcam.capture();
+
+
+  frames.push(frame);
+  if (frames.length === 4) {
+    const data = {
+      frames: frames,
+    };
+
+    v.resultado( await axios.post('https://inf-7add3120-788f-44ba-a66b-6576397d3514-no4xvrhsfq-uc.a.run.app/detect', data))
+    frames = [];
+  }
+}, 1000);
   },
+  methods: {
+    audios() {
+      const orden = Math.floor(Math.random() * 3)
+      this.orden = this.listaAudios[orden]
+      const sound = new Howl({
+        src: [`/audio/${this.listaAudios[orden]}.mp3`], // Ruta a tu archivo de audio
+      })
+      sound.play()
+    },
+    async resultado(data) {
+      let prob = 0
+      for (const item of data) {
+        if (item.label === this.orden) {
+          prob++
+        }
+      }
+      if (prob >= 2) {
+        await axios.get('http://localhost:5000/premio')
+        message.info('Has obtenido un premio')
+      } else {
+        message.error('No obtienes un premio')
+      }
+    }
+  }
 };
 </script>
